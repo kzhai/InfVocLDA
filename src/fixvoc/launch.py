@@ -197,7 +197,7 @@ def main():
         if batch_size<=0:
             docset = train_docs;
         else:
-            docset = train_docs[(batch_size * iteration) % (number_of_documents) : (batch_size * (iteration+1) - 1) % number_of_documents + 1];
+            docset = train_docs[(batch_size * iteration) % len(train_docs) : (batch_size * (iteration+1) - 1) % len(train_docs) + 1];
             print "select documents from %d to %d" % ((batch_size * iteration) % (number_of_documents), (batch_size * (iteration+1) - 1) % number_of_documents + 1)
 
         clock = time.time();
