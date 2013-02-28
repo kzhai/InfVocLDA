@@ -6,8 +6,6 @@ import scipy.io;
 import nltk;
 import numpy;
 
-import hybrid;
-
 from nltk.corpus import stopwords;
 from nltk.probability import FreqDist;
 
@@ -175,6 +173,7 @@ def main():
         train_docs.append(line.strip());
     print "successfully load all training documents..."
 
+    import hybrid;
     olda = hybrid.Hybrid(3, 20, dict_file)
 
     olda._initialize(vocab,
