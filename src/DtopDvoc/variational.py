@@ -62,46 +62,46 @@ class Variational(Inferencer):
         return wordids, wordcts
 
     def e_step(self, wordids, wordcts):
-        batchD = len(wordids)
+        batch_size = len(wordids)
 
         document_level_elbo = 0;
 
         # Initialize the variational distribution q(theta|gamma) for the mini-batch
-        gamma = 1*numpy.random.gamma(100., 1./100., (batchD, self._number_of_topics))
-        expElogtheta = numpy.exp(compute_dirichlet_expectation(gamma))
+        gamma = 1*numpy.random.gamma(100., 1./100., (batch_size, self._number_of_topics))
+        exp_E_log_theta = numpy.exp(compute_dirichlet_expectation(gamma))
 
         sstats = numpy.zeros(self._lambda.shape)
         # Now, for each document d update that document's gamma and phi
         meanchange = 0
-        for d in range(0, batchD):
+        for d in range(0, batch_size):
             # These are mostly just shorthand (but might help cache locality)
             ids = wordids[d]
             cts = wordcts[d]
             gammad = gamma[d, :]
-            expElogthetad = expElogtheta[d, :]
-            expElogbetad = self._exp_expect_log_beta[:, ids]
-            # The optimal phi_{dwk} is proportional to expElogthetad_k * expElogbetad_w. phinorm is the normalizer.
-            phinorm = numpy.dot(expElogthetad, expElogbetad) + 1e-100
+            exp_E_log_theta_d = exp_E_log_theta[d, :]
+            exp_E_log_beta_d = self._exp_expect_log_beta[:, ids]
+            # The optimal phi_{dwk} is proportional to expElogthetad_k * expElogbetad_w. phi_norm is the normalizer.
+            phi_norm = numpy.dot(exp_E_log_theta_d, exp_E_log_beta_d) + 1e-100
             # Iterate between gamma and phi until convergence
             for it in range(0, self._maximum_gamma_update_iteration):
                 lastgamma = gammad
                 # We represent phi implicitly to save memory and time. Substituting the value of the optimal phi back into the update for gamma gives this update. Cf. Lee&Seung 2001.
-                gammad = self._alpha + expElogthetad * numpy.dot(cts / phinorm, expElogbetad.T)
-                expElogthetad = numpy.exp(compute_dirichlet_expectation(gammad))
-                phinorm = numpy.dot(expElogthetad, expElogbetad) + 1e-100
+                gammad = self._alpha + exp_E_log_theta_d * numpy.dot(cts / phi_norm, exp_E_log_beta_d.T)
+                exp_E_log_theta_d = numpy.exp(compute_dirichlet_expectation(gammad))
+                phi_norm = numpy.dot(exp_E_log_theta_d, exp_E_log_beta_d) + 1e-100
                 # If gamma hasn't changed much, we're done.
                 meanchange = numpy.mean(abs(gammad - lastgamma))
                 if (meanchange < self._minimum_mean_change_threshold):
                     break
             gamma[d, :] = gammad
             # Contribution of document d to the expected sufficient statistics for the M step.
-            sstats[:, ids] += numpy.outer(expElogthetad.T, cts/phinorm)
+            sstats[:, ids] += numpy.outer(exp_E_log_theta_d.T, cts/phi_norm)
                         
             if self._compute_elbo:
-                document_level_elbo += numpy.sum(cts * phinorm)
+                document_level_elbo += numpy.sum(cts * phi_norm)
 
                 # E[log p(theta | alpha) - log q(theta | gamma)]
-                document_level_elbo += numpy.sum((self._alpha - gammad) * expElogthetad);
+                document_level_elbo += numpy.sum((self._alpha - gammad) * exp_E_log_theta_d);
                 document_level_elbo += numpy.sum(scipy.special.gammaln(gammad) - scipy.special.gammaln(self._alpha));
                 document_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha * self._number_of_topics) - scipy.special.gammaln(numpy.sum(gammad)));
 
@@ -109,7 +109,7 @@ class Variational(Inferencer):
         sstats = sstats * self._exp_expect_log_beta
 
         if self._compute_elbo:
-            document_level_elbo *= self._number_of_documents / batchD;
+            document_level_elbo *= self._number_of_documents / batch_size;
 
         return gamma, sstats, document_level_elbo
 
@@ -144,14 +144,14 @@ class Variational(Inferencer):
             docs = temp
 
         (wordids, wordcts) = self.parse_doc_list(docs)
-        batchD = len(docs)
+        batch_size = len(docs)
 
         score = 0
         Elogtheta = compute_dirichlet_expectation(gamma)
         expElogtheta = numpy.exp(Elogtheta)
 
         # E[log p(docs | theta, beta)]
-        for d in range(0, batchD):
+        for d in range(0, batch_size):
             gammad = gamma[d, :]
             ids = wordids[d]
             cts = numpy.array(wordcts[d])
