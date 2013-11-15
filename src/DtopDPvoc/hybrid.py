@@ -15,8 +15,6 @@ import nchar;
 import nltk;
 import nltk.corpus;
 
-numpy.random.seed(100000001)
-
 """
 Implements online variational Bayesian for LDA.
 """
@@ -29,9 +27,10 @@ class Hybrid:
                  dict_list=None,
                  N=3,
                  word_model_smooth=1e6,
-                 char_list=string.lowercase
+                 char_list=string.lowercase,
                  #char_list=string.lowercase + string.digits
-                 ):
+                 ranking_statistics_scale=1e30
+                    ):
         from nltk.stem.porter import PorterStemmer
         self._stemmer = PorterStemmer();
 
@@ -87,7 +86,9 @@ class Hybrid:
 
             self._word_model = None;
         #'''
-
+        
+        self._ranking_statistics_scale = ranking_statistics_scale;
+        
         self._setting_title = "settings-";
         self._param_title = "param-";
         self._exp_beta_title = "exp_beta-";
@@ -101,7 +102,7 @@ class Hybrid:
         self._nupos_title = "nupos-";
         self._ranking_statistics_title = "ranking-";
         self._trace_title = "trace-";
-                
+        
     """
     """
     def _initialize(self,
@@ -123,11 +124,10 @@ class Hybrid:
                     #burn_in_sweeps=2
                     burn_in_sweeps=5
                     ):
-        
         self._number_of_topics = number_of_topics;
         self._number_of_documents = number_of_documents;
         self._batch_size = batch_size;
-
+        
         self._word_to_index = {};
         self._index_to_word = {};
         for word in set(vocab):
@@ -179,8 +179,6 @@ class Hybrid:
         
         self._ranking_smooth_factor = ranking_smooth_factor;
         self._reorder_vocab_interval = refine_vocab_interval;
-        
-        self._ranking_statistics_scale = 1e30;
         
         self._counter = 0;
 
