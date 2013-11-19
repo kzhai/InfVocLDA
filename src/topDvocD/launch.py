@@ -84,8 +84,8 @@ def main():
     print "successfully load all training documents..."
     
     # Vocabulary
-    dict_file = options.dictionary;
-    if dict_file==None:
+    dictionary_file = options.dictionary;
+    if dictionary_file==None:
         vocab = [];
         line_count = 0;
         for line in open(os.path.join(input_directory, 'voc.dat'), 'r'):
@@ -96,7 +96,7 @@ def main():
         vocab = list(set(vocab));
         print "successfully load all the words from first epoch..."
     else:
-        input_file = open(dict_file, 'r');
+        input_file = open(dictionary_file, 'r');
         vocab = [];
         for line in input_file:
             vocab.append(line.strip().split()[0]);
@@ -143,7 +143,7 @@ def main():
     # parameter set 1
     options_output_file.write("input_directory=" + input_directory + "\n");
     options_output_file.write("corpus_name=" + corpus_name + "\n");
-    options_output_file.write("dictionary_file=" + str(dict_file) + "\n");
+    options_output_file.write("dictionary_file=" + str(dictionary_file) + "\n");
     # parameter set 2
     options_output_file.write("number_of_documents=" + str(number_of_documents) + "\n");
     options_output_file.write("number_of_topics=" + str(number_of_topics) + "\n");
@@ -166,7 +166,7 @@ def main():
     print "output_directory=" + output_directory
     print "input_directory=" + input_directory
     print "corpus_name=" + corpus_name
-    print "dictionary file=" + str(dict_file)
+    print "dictionary_file=" + str(dictionary_file)
     # parameter set 2
     print "number_of_documents=" + str(number_of_documents)
     print "number_of_topics=" + str(number_of_topics)

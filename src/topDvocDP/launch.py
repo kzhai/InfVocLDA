@@ -122,16 +122,16 @@ def main():
     output_directory = os.path.join(output_directory, suffix);
     os.mkdir(os.path.abspath(output_directory));
     
-    dict_file = options.dictionary;
-    if dict_file != None:
-        dict_file = dict_file.strip();
+    dictionary_file = options.dictionary;
+    if dictionary_file != None:
+        dictionary_file = dictionary_file.strip();
         
     # store all the options to a file
     options_output_file = open(output_directory + "option.txt", 'w');
     # parameter set 1
     options_output_file.write("input_directory=" + input_directory + "\n");
     options_output_file.write("corpus_name=" + corpus_name + "\n");
-    options_output_file.write("dictionary_file=" + str(dict_file) + "\n");
+    options_output_file.write("dictionary_file=" + str(dictionary_file) + "\n");
     # parameter set 2
     options_output_file.write("number_of_documents=" + str(number_of_documents) + "\n");
     options_output_file.write("number_of_topics=" + str(number_of_topics) + "\n");
@@ -155,7 +155,7 @@ def main():
     print "output_directory=" + output_directory
     print "input_directory=" + input_directory
     print "corpus_name=" + corpus_name
-    print "dictionary file=" + str(dict_file)
+    print "dictionary_file=" + str(dictionary_file)
     # parameter set 2
     print "number_of_documents=" + str(number_of_documents)
     print "number_of_topics=" + str(number_of_topics)
@@ -187,7 +187,7 @@ def main():
     print "successfully load all training documents..."
 
     import hybrid;
-    olda = hybrid.Hybrid(3, 20, dict_file)
+    olda = hybrid.Hybrid(3, 20, dictionary_file)
 
     olda._initialize(vocab,
                      number_of_topics,
