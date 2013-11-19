@@ -75,7 +75,14 @@ def main():
     output_directory = os.path.join(output_directory, corpus_name);
     if not os.path.exists(output_directory):
         os.mkdir(output_directory);
-        
+    
+    # Documents
+    train_docs = [];
+    input_file = open(os.path.join(input_directory, 'doc.dat'), 'r');
+    for line in input_file:
+        train_docs.append(line.strip());
+    print "successfully load all training documents..."
+    
     # Vocabulary
     dict_file = options.dictionary;
     if dict_file==None:
@@ -126,19 +133,7 @@ def main():
     suffix += "-%s" % (hybrid_mode);
     suffix += "-%s" % (hash_oov_words);
     suffix += "/";
-    '''
-    suffix += "-D%d-K%d-S%d-B%d-O%d-t%d-k%g-at%g-%s-%s/" % (number_of_documents,
-                                                            number_of_topics,
-                                                            snapshot_interval,
-                                                            batch_size,
-                                                            online_iterations,
-                                                            tau,
-                                                            kappa,
-                                                            alpha_theta,
-                                                            hybrid_mode,
-                                                            hash_oov_words);
-    '''
-                                                                
+    
     output_directory = os.path.join(output_directory, suffix);
     
     os.mkdir(os.path.abspath(output_directory));
@@ -188,13 +183,6 @@ def main():
     print "hybrid_mode=" + str(hybrid_mode)
     print "hash_oov_words=%s" % (hash_oov_words)
     print "========== ========== ========== ========== =========="
-
-    # Documents
-    train_docs = [];
-    input_file = open(os.path.join(input_directory, 'doc.dat'), 'r');
-    for line in input_file:
-        train_docs.append(line.strip());
-    print "successfully load all training documents..."
 
     if hybrid_mode:
         import hybrid;
