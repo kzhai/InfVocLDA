@@ -21,13 +21,13 @@ First, redirect to the source code directory
 
 To launch the online LDA with pre-defined vocabulary, run the following command
 
-    python -m fixvoc.launch --input_directory=../input/ --output_directory=../output/ --corpus_name=20-news --number_of_topics=10 --number_of_documents=18600 --batch_size=100
+    python -m topDvocD.launch --input_directory=../input/ --output_directory=../output/ --corpus_name=20-news --number_of_topics=10 --number_of_documents=18600 --batch_size=100
 
 To launch the online LDA with dynamic vocabulary, run the following command
 
-    python -m infvoc.launch --input_directory=../input/ --output_directory=../output/ --corpus_name=de-news --desired_truncation_level=4000 --number_of_topics=10 --number_of_documents=9800 --vocab_prune_interval=10 --batch_size=100 --alpha_beta=1000
+    python -m topDvocDP.launch --input_directory=../input/ --output_directory=../output/ --corpus_name=de-news --desired_truncation_level=4000 --number_of_topics=10 --number_of_documents=9800 --vocab_prune_interval=10 --batch_size=100 --alpha_beta=1000
 
 Under any cirsumstances, you may also get help information and usage hints by running the following command
 
-    python -m fixvoc.launch --help
-    python -m infvoc.launch --help
+    python -m topDvocD.launch --help
+    python -m topDvocDP.launch --help
