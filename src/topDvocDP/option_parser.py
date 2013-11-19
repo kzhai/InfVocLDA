@@ -11,7 +11,7 @@ def parse_args():
                         dictionary=None,
                         
                         # parameter set 2
-                        desired_truncation_level=1000,
+                        truncation_level=1000,
                         number_of_topics=25,
                         number_of_documents=-1,
 
@@ -44,7 +44,7 @@ def parse_args():
                       help="the dictionary file [None]")
     
     # parameter set 2
-    parser.add_option("--desired_truncation_level", type="int", dest="desired_truncation_level",
+    parser.add_option("--truncation_level", type="int", dest="truncation_level",
                       help="desired truncation level [1000]");
     parser.add_option("--number_of_topics", type="int", dest="number_of_topics",
                       help="second level truncation [25]");

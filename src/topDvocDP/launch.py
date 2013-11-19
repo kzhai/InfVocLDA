@@ -40,8 +40,8 @@ def main():
     number_of_documents = options.number_of_documents;
     assert(options.number_of_topics>0);
     number_of_topics = options.number_of_topics;
-    assert(options.desired_truncation_level>0);
-    desired_truncation_level = options.desired_truncation_level;
+    assert(options.truncation_level>0);
+    truncation_level = options.truncation_level;
 
     # parameter set 3
     assert(options.vocab_prune_interval>0);
@@ -96,7 +96,7 @@ def main():
     suffix = now.strftime("%y%b%d-%H%M%S")+"";
     suffix += "-D%d" % (number_of_documents);
     suffix += "-K%d" % (number_of_topics)
-    suffix += "-T%d" % (desired_truncation_level);
+    suffix += "-T%d" % (truncation_level);
     suffix += "-P%d" % (vocab_prune_interval);
     suffix += "-I%d" % (snapshot_interval);
     suffix += "-B%d" % (batch_size);
@@ -109,7 +109,7 @@ def main():
     '''
     suffix += "-D%d-K%d-T%d-P%d-S%d-B%d-O%d-t%d-k%g-at%g-ab%g/" % (number_of_documents,
                                                                    number_of_topics,
-                                                                   desired_truncation_level,
+                                                                   truncation_level,
                                                                    vocab_prune_interval,
                                                                    snapshot_interval,
                                                                    batch_size,
@@ -135,7 +135,7 @@ def main():
     # parameter set 2
     options_output_file.write("number_of_documents=" + str(number_of_documents) + "\n");
     options_output_file.write("number_of_topics=" + str(number_of_topics) + "\n");
-    options_output_file.write("desired_truncation_level=" + str(desired_truncation_level) + "\n");
+    options_output_file.write("truncation_level=" + str(truncation_level) + "\n");
     # parameter set 3
     options_output_file.write("vocab_prune_interval=" + str(vocab_prune_interval) + "\n");
     options_output_file.write("snapshot_interval=" + str(snapshot_interval) + "\n");
@@ -159,7 +159,7 @@ def main():
     # parameter set 2
     print "number_of_documents=" + str(number_of_documents)
     print "number_of_topics=" + str(number_of_topics)
-    print "desired_truncation_level=" + str(desired_truncation_level)
+    print "truncation_level=" + str(truncation_level)
     # parameter set 3
     print "vocab_prune_interval=" + str(vocab_prune_interval)
     print "snapshot_interval=" + str(snapshot_interval);
@@ -193,7 +193,7 @@ def main():
                      number_of_topics,
                      number_of_documents,
                      batch_size,
-                     desired_truncation_level,
+                     truncation_level,
                      alpha_theta,
                      alpha_beta,
                      tau,
