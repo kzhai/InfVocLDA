@@ -23,6 +23,7 @@ def parse_args():
                         kappa=0.6,
                         tau=64.0,
                         alpha_theta=-1,
+                        alpha_eta=-1,
                         
                         # parameter set 5
                         hybrid_mode=False,
@@ -59,6 +60,8 @@ def parse_args():
                       help="learning inertia [64.0]")
     parser.add_option("--alpha_theta", type="float", dest="alpha_theta",
                       help="hyper-parameter for Dirichlet distribution of topics [1.0/number_of_topics]")
+    parser.add_option("--alpha_eta", type="float", dest="alpha_eta",
+                      help="hyper-parameter for Dirichlet distribution of vocabulary [1.0/number_of_vocabulary]")
     
     # parameter set 5
     parser.add_option("--hybrid_mode", action='store_true', default=False, dest="hybrid_mode",

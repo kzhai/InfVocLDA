@@ -48,19 +48,6 @@ def main():
     online_iterations=number_of_documents/batch_size;
     if options.online_iterations>0:
         online_iterations=options.online_iterations;
-
-    # parameter set 4
-    assert(options.tau>=0);
-    tau = options.tau;
-    #assert(options.kappa>=0.5 and options.kappa<=1);
-    assert(options.kappa>=0 and options.kappa<=1);
-    kappa = options.kappa;
-    if batch_size<=0:
-        print "warning: running in batch mode..."
-        kappa = 0;
-    alpha_theta = 1.0/number_of_topics;
-    if options.alpha_theta>0:
-        alpha_theta=options.alpha_theta;
     
     # parameter set 5
     hybrid_mode = options.hybrid_mode;
@@ -88,6 +75,41 @@ def main():
     output_directory = os.path.join(output_directory, corpus_name);
     if not os.path.exists(output_directory):
         os.mkdir(output_directory);
+        
+    # Vocabulary
+    dict_file = options.dictionary;
+    if dict_file==None:
+        vocab = [];
+        line_count = 0;
+        for line in open(os.path.join(input_directory, 'voc.dat'), 'r'):
+            vocab.append(line.strip().split()[0]);
+            line_count += 1
+            if line_count>=batch_size:
+                break;
+        vocab = list(set(vocab));
+        print "successfully load all the words from first epoch..."
+    else:
+        input_file = open(dict_file, 'r');
+        vocab = [];
+        for line in input_file:
+            vocab.append(line.strip().split()[0]);
+        print "successfully load all the dictionary words..."
+        
+    # parameter set 4
+    assert(options.tau>=0);
+    tau = options.tau;
+    #assert(options.kappa>=0.5 and options.kappa<=1);
+    assert(options.kappa>=0 and options.kappa<=1);
+    kappa = options.kappa;
+    if batch_size<=0:
+        print "warning: running in batch mode..."
+        kappa = 0;
+    alpha_theta = 1.0/number_of_topics;
+    if options.alpha_theta>0:
+        alpha_theta=options.alpha_theta;
+    options.alpha_eta = 1.0/len(vocab);
+    if options.alpha_eta>0:
+        alpha_eta=options.alpha_eta
      
     # create output directory
     now = datetime.datetime.now();
@@ -100,6 +122,7 @@ def main():
     suffix += "-t%d" % (tau);
     suffix += "-k%g" % (kappa);
     suffix += "-at%g" % (alpha_theta);
+    suffix += "-ae%g" % (alpha_eta);
     suffix += "-%s" % (hybrid_mode);
     suffix += "-%s" % (hash_oov_words);
     suffix += "/";
@@ -119,8 +142,6 @@ def main():
     output_directory = os.path.join(output_directory, suffix);
     
     os.mkdir(os.path.abspath(output_directory));
-    
-    dict_file = options.dictionary;
         
     # store all the options to a file
     options_output_file = open(output_directory + "option.txt", 'w');
@@ -139,6 +160,7 @@ def main():
     options_output_file.write("tau=" + str(tau) + "\n");
     options_output_file.write("kappa=" + str(kappa) + "\n");
     options_output_file.write("alpha_theta=" + str(alpha_theta) + "\n");
+    options_output_file.write("alpha_eta=" + str(alpha_eta) + "\n");
     # parameter set 5
     options_output_file.write("hybrid_mode=" + str(hybrid_mode) + "\n");
     options_output_file.write("hash_oov_words=%s\n" % hash_oov_words);
@@ -161,28 +183,11 @@ def main():
     print "tau=" + str(tau)
     print "kappa=" + str(kappa)
     print "alpha_theta=" + str(alpha_theta)
+    print "alpha_eta=" + str(alpha_eta)
     # parameter set 5
     print "hybrid_mode=" + str(hybrid_mode)
     print "hash_oov_words=%s" % (hash_oov_words)
     print "========== ========== ========== ========== =========="
-
-    # Vocabulary
-    if dict_file==None:
-        vocab = [];
-        line_count = 0;
-        for line in open(os.path.join(input_directory, 'voc.dat'), 'r'):
-            vocab.append(line.strip().split()[0]);
-            line_count += 1
-            if line_count>=batch_size:
-                break;
-        vocab = list(set(vocab));
-        print "successfully load all the words from first epoch..."
-    else:
-        input_file = open(dict_file, 'r');
-        vocab = [];
-        for line in input_file:
-            vocab.append(line.strip().split()[0]);
-        print "successfully load all the dictionary words..."
 
     # Documents
     train_docs = [];
@@ -191,8 +196,6 @@ def main():
         train_docs.append(line.strip());
     print "successfully load all training documents..."
 
-    eta = 1./number_of_topics;
-
     if hybrid_mode:
         import hybrid;
         olda = hybrid.Hybrid(hash_oov_words);
@@ -200,7 +203,7 @@ def main():
         import variational;
         olda = variational.Variational(hash_oov_words);
         
-    olda._initialize(vocab, number_of_topics, number_of_documents, alpha_theta, eta, tau, kappa);
+    olda._initialize(vocab, number_of_topics, number_of_documents, alpha_theta, alpha_eta, tau, kappa);
 
     olda.export_beta(os.path.join(output_directory, 'exp_beta-0'), 50);
 

@@ -485,6 +485,22 @@ class Hybrid:
 
     """
     """
+    def inference(self, batch):
+        # This is to handle the case where someone just hands us a single document, not in a list.
+        if (type(batch).__name__ == 'string'):
+            temp = list()
+            temp.append(batch)
+            batch = temp
+
+        batch_size = len(batch);
+        wordids, wordcts = self.parse_doc_list(batch);
+        
+        gamma = self.e_step(batch_size, wordids, wordcts, True);
+        #log_likelihood = self.log_likelihood(batch, gamma, True);
+        return gamma;
+
+    """
+    """
     def reverse_cumulative_sum_matrix_over_axis(self, matrix, axis):
         cumulative_sum = numpy.zeros(matrix.shape);
         (k, n) = matrix.shape;
@@ -764,47 +780,3 @@ class Hybrid:
             numpy.savetxt(gamma_path, self._document_topic_distribution);
             #scipy.io.mmwrite(gamma_path, self._document_topic_distribution);
             self._document_topic_distribution = None;
-        
-    """
-    """
-    def inference(self, batch):
-        # This is to handle the case where someone just hands us a single document, not in a list.
-        if (type(batch).__name__ == 'string'):
-            temp = list()
-            temp.append(batch)
-            batch = temp
-
-        batch_size = len(batch);
-        wordids, wordcts = self.parse_doc_list(batch);
-        
-        gamma = self.e_step(batch_size, wordids, wordcts, True);
-        #log_likelihood = self.log_likelihood(batch, gamma, True);
-        return gamma;
-
-    """
-    Compute the aggregate digamma values, for phi update.
-    """
-    def compute_exp_weights_old(self):
-        nu_1_over_nu_all = {};
-        nu_2_over_nu_all = {};
-        prod_nu_2_over_nu_all = {};
-        exp_weights = {};
-        exp_oov_weights = {};
-        
-        for k in xrange(self._number_of_topics):
-            nu_1_over_nu_all[k] = self._nu_1[k] / (self._nu_1[k] + self._nu_2[k]);
-            nu_2_over_nu_all[k] = self._nu_2[k] / (self._nu_1[k] + self._nu_2[k]);
-            #assert(nu_1_over_nu_all.shape == (self._number_of_topics, self._truncation_size));
-            #assert(nu_2_over_nu_all.shape == (self._number_of_topics, self._truncation_size));
-        
-            prod_nu_2_over_nu_all[k] = numpy.cumprod(nu_2_over_nu_all[k], axis=1);
-            #assert(prod_nu_2_over_nu_all.shape == (self._number_of_topics, self._truncation_size));
-            
-            exp_weights[k] = numpy.hstack((numpy.ones((1, 1)), prod_nu_2_over_nu_all[k][:, :-1]));
-            exp_weights[k] *= nu_1_over_nu_all[k];
-            #assert(exp_weights.shape == (self._number_of_topics, self._truncation_size));
-            #exp_oov_weights[k] = prod_nu_2_over_nu_all[k][:, -1][:, numpy.newaxis];
-            exp_oov_weights[k] = prod_nu_2_over_nu_all[k][0, -1];
-            #assert(exp_oov_weights.shape == (self._number_of_topics, 1));
-
-        return exp_weights, exp_oov_weights;
