@@ -94,7 +94,19 @@ def main():
     # create output directory
     now = datetime.datetime.now();
     suffix = now.strftime("%y%b%d-%H%M%S")+"";
-    #output_directory += "-" + str(now.microsecond) + "/";
+    suffix += "-D%d" % (number_of_documents);
+    suffix += "-K%d" % (number_of_topics)
+    suffix += "-T%d" % (desired_truncation_level);
+    suffix += "-P%d" % (vocab_prune_interval);
+    suffix += "-I%d" % (snapshot_interval);
+    suffix += "-B%d" % (batch_size);
+    suffix += "-O%d" % (online_iterations);
+    suffix += "-t%d" % (tau);
+    suffix += "-k%g" % (kappa);
+    suffix += "-at%g" % (alpha_theta);
+    suffix += "-ab%g" % (alpha_beta);
+    suffix += "/";
+    '''
     suffix += "-D%d-K%d-T%d-P%d-S%d-B%d-O%d-t%d-k%g-at%g-ab%g/" % (number_of_documents,
                                                                    number_of_topics,
                                                                    desired_truncation_level,
@@ -106,6 +118,7 @@ def main():
                                                                    kappa,
                                                                    alpha_theta,
                                                                    alpha_beta);
+    '''
     output_directory = os.path.join(output_directory, suffix);
     os.mkdir(os.path.abspath(output_directory));
     

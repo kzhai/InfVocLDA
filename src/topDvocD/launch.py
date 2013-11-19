@@ -92,6 +92,18 @@ def main():
     # create output directory
     now = datetime.datetime.now();
     suffix = now.strftime("%y%b%d-%H%M%S")+"";
+    suffix += "-D%d" % (number_of_documents);
+    suffix += "-K%d" % (number_of_topics)
+    suffix += "-I%d" % (snapshot_interval);
+    suffix += "-B%d" % (batch_size);
+    suffix += "-O%d" % (online_iterations);
+    suffix += "-t%d" % (tau);
+    suffix += "-k%g" % (kappa);
+    suffix += "-at%g" % (alpha_theta);
+    suffix += "-%s" % (hybrid_mode);
+    suffix += "-%s" % (hash_oov_words);
+    suffix += "/";
+    '''
     suffix += "-D%d-K%d-S%d-B%d-O%d-t%d-k%g-at%g-%s-%s/" % (number_of_documents,
                                                             number_of_topics,
                                                             snapshot_interval,
@@ -102,9 +114,10 @@ def main():
                                                             alpha_theta,
                                                             hybrid_mode,
                                                             hash_oov_words);
+    '''
+                                                                
     output_directory = os.path.join(output_directory, suffix);
-                                                           
-
+    
     os.mkdir(os.path.abspath(output_directory));
     
     dict_file = options.dictionary;
