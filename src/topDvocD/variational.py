@@ -86,7 +86,7 @@ class Variational(Inferencer):
             for it in range(0, self._maximum_gamma_update_iteration):
                 lastgamma = gammad
                 # We represent phi implicitly to save memory and time. Substituting the value of the optimal phi back into the update for gamma gives this update. Cf. Lee&Seung 2001.
-                gammad = self._alpha + exp_E_log_theta_d * numpy.dot(cts / phi_norm, exp_E_log_beta_d.T)
+                gammad = self._alpha_theta + exp_E_log_theta_d * numpy.dot(cts / phi_norm, exp_E_log_beta_d.T)
                 exp_E_log_theta_d = numpy.exp(compute_dirichlet_expectation(gammad))
                 phi_norm = numpy.dot(exp_E_log_theta_d, exp_E_log_beta_d) + 1e-100
                 # If gamma hasn't changed much, we're done.
@@ -101,9 +101,9 @@ class Variational(Inferencer):
                 document_level_elbo += numpy.sum(cts * phi_norm)
 
                 # E[log p(theta | alpha) - log q(theta | gamma)]
-                document_level_elbo += numpy.sum((self._alpha - gammad) * exp_E_log_theta_d);
-                document_level_elbo += numpy.sum(scipy.special.gammaln(gammad) - scipy.special.gammaln(self._alpha));
-                document_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha * self._number_of_topics) - scipy.special.gammaln(numpy.sum(gammad)));
+                document_level_elbo += numpy.sum((self._alpha_theta - gammad) * exp_E_log_theta_d);
+                document_level_elbo += numpy.sum(scipy.special.gammaln(gammad) - scipy.special.gammaln(self._alpha_theta));
+                document_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha_theta * self._number_of_topics) - scipy.special.gammaln(numpy.sum(gammad)));
 
         # This step finishes computing the sufficient statistics for the M step, so that sstats[k, w] = \sum_d n_{dw} * phi_{dwk} = \sum_d n_{dw} * exp{Elogtheta_{dk} + Elogbeta_{kw}} / phinorm_{dw}.
         sstats = sstats * self._exp_expect_log_beta
@@ -168,17 +168,17 @@ class Variational(Inferencer):
 #             score += n.sum(cts * n.log(phinorm))
 
         # E[log p(theta | alpha) - log q(theta | gamma)]
-        score += numpy.sum((self._alpha - gamma)*Elogtheta)
-        score += numpy.sum(gammaln(gamma) - gammaln(self._alpha))
-        score += sum(gammaln(self._alpha*self._number_of_topics) - gammaln(numpy.sum(gamma, 1)))
+        score += numpy.sum((self._alpha_theta - gamma)*Elogtheta)
+        score += numpy.sum(gammaln(gamma) - gammaln(self._alpha_theta))
+        score += sum(gammaln(self._alpha_theta*self._number_of_topics) - gammaln(numpy.sum(gamma, 1)))
 
         # Compensate for the subsampling of the population of documents
         score = score * self._number_of_documents / len(docs)
 
         # E[log p(beta | eta) - log q (beta | lambda)]
-        score = score + numpy.sum((self._eta-self._lambda)*self._Elogbeta)
-        score = score + numpy.sum(gammaln(self._lambda) - gammaln(self._eta))
-        score = score + numpy.sum(gammaln(self._eta*self._vocab_size) - 
+        score = score + numpy.sum((self._alpha_eta-self._lambda)*self._Elogbeta)
+        score = score + numpy.sum(gammaln(self._lambda) - gammaln(self._alpha_eta))
+        score = score + numpy.sum(gammaln(self._alpha_eta*self._vocab_size) - 
                               gammaln(numpy.sum(self._lambda, 1)))
 
         return(score)

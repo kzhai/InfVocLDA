@@ -33,8 +33,8 @@ class Inferencer:
                     vocab,
                     number_of_topics,
                     number_of_documents,
-                    alpha,
-                    eta,
+                    alpha_theta,
+                    alpha_eta,
                     tau0,
                     kappa
                     ):
@@ -47,8 +47,8 @@ class Inferencer:
         self._number_of_topics = number_of_topics
         self._vocab_size = len(self._vocab)
         self._number_of_documents = number_of_documents
-        self._alpha = alpha
-        self._eta = eta
+        self._alpha_theta = alpha_theta
+        self._alpha_eta = alpha_eta
         self._tau = tau0 + 1
         self._kappa = kappa
         self._counter = 0
@@ -62,73 +62,24 @@ class Inferencer:
     def parse_doc_list(self, docs):
         raise NotImplementedError;
     
-    '''    
     def e_step(self, wordids):
         raise NotImplementedError;
-        
-        batchD = len(wordids)
-
-        sufficient_statistics = numpy.zeros((self._number_of_topics, self._vocab_size));
-
-        # Initialize the variational distribution q(theta|gamma) for the mini-batch
-        batch_document_topic_distribution = numpy.zeros((batchD, self._number_of_topics));
-
-        # Now, for each document d update that document's gamma and phi
-        for d in xrange(batchD):
-            phi = numpy.random.random((self._number_of_topics, len(wordids[d])));
-            phi = phi / numpy.sum(phi, axis=0)[numpy.newaxis, :];
-            phi_sum = numpy.sum(phi, axis=1)[:, numpy.newaxis];
-            assert(phi_sum.shape == (self._number_of_topics, 1));
-
-            for it in xrange(self._number_of_samples):
-                for n in xrange(len(wordids[d])):
-                    id = wordids[d][n];
-                    
-                    phi_sum -= phi[:, n][:, numpy.newaxis];
-                    
-                    # this is to get rid of the underflow error from the above summation, ideally, phi will become all integers after few iterations
-                    phi_sum *= phi_sum > 0;
-                    #assert(numpy.all(phi_sum >= 0));
-
-                    temp_phi = (phi_sum + self._alpha).T * self._exp_expect_log_beta[:, wordids[d][n]];
-                    assert(temp_phi.shape == (1, self._number_of_topics));
-                    temp_phi /= numpy.sum(temp_phi);
-
-                    # sample a topic for this word
-                    temp_phi = numpy.random.multinomial(1, temp_phi[0])[:, numpy.newaxis];
-                    assert(temp_phi.shape == (self._number_of_topics, 1));
-                    
-                    phi[:, n][:, numpy.newaxis] = temp_phi;
-                    phi_sum += temp_phi;
-
-                    # discard the first few burn-in sweeps
-                    if it < self._burn_in_sweeps:
-                        continue;
-                    
-                    sufficient_statistics[:, id] += temp_phi[:, 0];
-
-            batch_document_topic_distribution[d, :] = self._alpha + phi_sum.T[0, :];
-
-        sufficient_statistics /= (self._number_of_samples - self._burn_in_sweeps);
-
-        return (batch_document_topic_distribution, sufficient_statistics)
-    '''
 
     def m_step(self, batch_size, sstats):
         # rhot will be between 0 and 1, and says how much to weight the information we got from this mini-batch.
         self._epsilon = pow(self._tau + self._counter, -self._kappa)
         
         # update lambda based on documents.
-        self._lambda = self._lambda * (1-self._epsilon) + self._epsilon * (self._eta + self._number_of_documents * sstats / batch_size);
+        self._lambda = self._lambda * (1-self._epsilon) + self._epsilon * (self._alpha_eta + self._number_of_documents * sstats / batch_size);
         expect_log_beta = compute_dirichlet_expectation(self._lambda);
         self._exp_expect_log_beta = numpy.exp(expect_log_beta);
         
         corpus_level_elbo = 0;
         
         if self._compute_elbo:
-            corpus_level_elbo += numpy.sum((self._eta - self._lambda) * expect_log_beta);
-            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._lambda) - scipy.special.gammaln(self._eta));
-            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._eta * self._vocab_size) - scipy.special.gammaln(numpy.sum(self._lambda, 1)))
+            corpus_level_elbo += numpy.sum((self._alpha_eta - self._lambda) * expect_log_beta);
+            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._lambda) - scipy.special.gammaln(self._alpha_eta));
+            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha_eta * self._vocab_size) - scipy.special.gammaln(numpy.sum(self._lambda, 1)))
         
         return corpus_level_elbo;
 

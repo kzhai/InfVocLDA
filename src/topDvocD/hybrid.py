@@ -86,12 +86,12 @@ class Hybrid(Inferencer):
                     phi_sum *= phi_sum > 0;
                     #assert(numpy.all(phi_sum >= 0));
 
-                    temp_phi = (phi_sum + self._alpha).T * self._exp_expect_log_beta[:, wordids[d][n]];
+                    temp_phi = (phi_sum + self._alpha_theta).T * self._exp_expect_log_beta[:, wordids[d][n]];
                     assert(temp_phi.shape == (1, self._number_of_topics));
                     temp_phi /= numpy.sum(temp_phi);
 
                     # sample a topic for this word
-                    temp_phi = numpy.random.multinomial(1, temp_phi[0])[:, numpy.newaxis];
+                    temp_phi = numpy.random.multinomial(1, temp_phi[0, :])[:, numpy.newaxis];
                     assert(temp_phi.shape == (self._number_of_topics, 1));
                     
                     phi[:, n][:, numpy.newaxis] = temp_phi;
@@ -103,15 +103,15 @@ class Hybrid(Inferencer):
                     
                     sufficient_statistics[:, id] += temp_phi[:, 0];
                     
-            batch_document_topic_distribution[d, :] = self._alpha + phi_sum.T[0, :];
+            batch_document_topic_distribution[d, :] = self._alpha_theta + phi_sum.T[0, :];
             
             if self._compute_elbo:
                 document_level_elbo += len(wordids[d]);
 
                 gammad = batch_document_topic_distribution[d];
-                document_level_elbo += numpy.sum((self._alpha - gammad) * numpy.exp(compute_dirichlet_expectation(gammad)));
-                document_level_elbo += numpy.sum(scipy.special.gammaln(gammad) - scipy.special.gammaln(self._alpha));
-                document_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha * self._number_of_topics) - scipy.special.gammaln(numpy.sum(gammad)));
+                document_level_elbo += numpy.sum((self._alpha_theta - gammad) * numpy.exp(compute_dirichlet_expectation(gammad)));
+                document_level_elbo += numpy.sum(scipy.special.gammaln(gammad) - scipy.special.gammaln(self._alpha_theta));
+                document_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha_theta * self._number_of_topics) - scipy.special.gammaln(numpy.sum(gammad)));
 
         sufficient_statistics /= (self._number_of_samples - self._burn_in_sweeps);
         

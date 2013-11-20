@@ -86,21 +86,13 @@ def main():
     # Vocabulary
     dictionary_file = options.dictionary;
     if dictionary_file==None:
-        vocab = [];
-        line_count = 0;
-        for line in open(os.path.join(input_directory, 'voc.dat'), 'r'):
-            vocab.append(line.strip().split()[0]);
-            line_count += 1
-            if line_count>=batch_size:
-                break;
-        vocab = list(set(vocab));
-        print "successfully load all the words from first epoch..."
-    else:
-        input_file = open(dictionary_file, 'r');
-        vocab = [];
-        for line in input_file:
-            vocab.append(line.strip().split()[0]);
-        print "successfully load all the dictionary words..."
+        dictionary_file = os.path.join(input_directory, 'voc.dat');
+    input_file = open(dictionary_file, 'r');
+    vocab = [];
+    for line in input_file:
+        vocab.append(line.strip().split()[0]);
+    vocab = list(set(vocab));
+    print "successfully load all the words from %s..." % (dictionary_file);        
         
     # parameter set 4
     assert(options.tau>=0);
