@@ -10,7 +10,7 @@ Please send any bugs of problems to Ke Zhai (kzhai@umd.edu).
 Install and Build
 ----------
 
-This package depends on many external python libraries, such as numpy, scipy and nltk. After downloading the source code packages, unzip the datasets to the 'input' directory. The package includes two fundamental datasets --- de-news and 20-newsgroup datasets.
+This package depends on many external python libraries, such as numpy, scipy and nltk. After downloading the source code packages, unzip the datasets to the 'input' directory. The package includes a few fundamental datasets --- ap, de-news and 20-newsgroup datasets.
 
 Launch and Execute
 ----------
