@@ -3,7 +3,7 @@ OnlineLDA
 
 OnlineLDA is a Latent Dirichlet Allocation topic modeling package based on Variational Bayesian learning approach under online settings, developed by the Cloud Computing Research Team in [University of Maryland, College Park] (http://www.umd.edu). You may find more details about this project on our papaer [Online Topic Models with Infinite Vocabulary] (http://www.umiacs.umd.edu/~jbg/docs/2013_icml_infvoc.pdf) appeared in ICML 2013.
 
-Please download the latest version from our [GitHub repository](https://github.com/kzhai/OnlineLDA).
+Please download the latest version from our [GitHub repository](https://github.com/kzhai/InfVocLDA).
 
 Please send any bugs of problems to Ke Zhai (kzhai@umd.edu).
 
