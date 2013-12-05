@@ -131,7 +131,7 @@ class Hybrid:
             self._truncation_size.append(len(self._index_to_nupos[k]));
             self._truncation_size_prime.append(len(self._index_to_nupos[k]));
             self._nu_1[k] = numpy.ones((1, self._truncation_size[k]));
-            self._nu_2[k] = numpy.ones((1, self._truncation_size[k]));
+            self._nu_2[k] = numpy.ones((1, self._truncation_size[k])) * self._alpha_beta;
 
         self._expected_truncation_size = expected_truncation_size;
         
