@@ -51,39 +51,7 @@ class Hybrid:
                 tokens.append(self._stemmer.stem(line));
             #tokens = set(tokens);
             self._word_model = nchar.NcharModel(self._n_char_model, tokens, self._word_model_smooth, self._maximum_word_length, self._minimum_word_length, self._char_list);
-
-            '''
-            print "successfully train the %d charactor word model." % (self._n_char_model);
-            print "\tdictionary file %s" % (dict_list);
-            print "\tword model smoothing %f" % (self._word_model_smooth);
-            print "\tminimum word length %d" % (self._minimum_word_length);
-            print "\tmaximum word length %d" % (self._maximum_word_length);
-            print "\tvalid charactor list %s" % (self._char_list);
-            '''
         else:
-            '''
-            from nltk.corpus import brown
-            tokens = [];
-            for word in brown.words():
-                word = word.lower();
-                word = re.sub(r'-', ' ', word);
-                word = re.sub(r'[^a-z0-9 ]', '', word);
-                word = re.sub(r' +', ' ', word);
-                if len(word)==0:
-                    continue;
-                if word in nltk.corpus.stopwords.words('english'):
-                    continue;
-                
-                tokens.append(stemmer.stem(word));
-            self._word_model = nchar.NcharModel(self._n_char_model, tokens, self._word_model_smooth, self._maximum_word_length, self._minimum_word_length, self._char_list);
-            print "successfully train the %d charactor word model." % (self._n_char_model);
-            print "\tdictionary is brown corpus in nltk";
-            print "\tword model smoothing %f" % (self._word_model_smooth);
-            print "\tminimum word length %d" % (self._minimum_word_length);
-            print "\tmaximum word length %d" % (self._maximum_word_length);
-            print "\tvalid charactor list %s" % (self._char_list);
-            '''
-
             self._word_model = None;
         #'''
         
@@ -304,7 +272,9 @@ class Hybrid:
     
     """
     """
-    def e_step(self, batch_size, wordids, directory=None):
+    def e_step(self, wordids, directory=None):
+        batch_size = len(wordids);
+        
         sufficient_statistics = {};
         for k in xrange(self._number_of_topics):
             sufficient_statistics[k] = numpy.zeros((1, self._truncation_size_prime[k]));
@@ -315,16 +285,16 @@ class Hybrid:
         #log_likelihood = 0;
         exp_weights, exp_oov_weights = self.compute_exp_weights();
         
-        # Now, for each document d update that document's phi_d for every words
-        for d in xrange(batch_size):
-            phi = numpy.random.random(wordids[d].shape);
+        # Now, for each document document_index update that document's phi_d for every words
+        for document_index in xrange(batch_size):
+            phi = numpy.random.random(wordids[document_index].shape);
             phi = phi / numpy.sum(phi, axis=0)[numpy.newaxis, :];
             phi_sum = numpy.sum(phi, axis=1)[:, numpy.newaxis];
             #assert(phi_sum.shape == (self.number_of_topics, 1));
 
-            for it in xrange(self._number_of_samples):
-                for n in xrange(wordids[d].shape[1]):
-                    phi_sum -= phi[:, n][:, numpy.newaxis];
+            for sample_index in xrange(self._number_of_samples):
+                for word_index in xrange(wordids[document_index].shape[1]):
+                    phi_sum -= phi[:, word_index][:, numpy.newaxis];
                     # this is to get rid of the underflow error from the above summation, ideally, phi will become all integers after few iterations
                     phi_sum *= phi_sum > 0;
                     #assert(numpy.all(phi_sum >= 0));
@@ -333,7 +303,7 @@ class Hybrid:
                     #assert(temp_phi.shape == (self.number_of_topics, 1));
                     
                     for k in xrange(self._number_of_topics):
-                        id = wordids[d][k, n];
+                        id = wordids[document_index][k, word_index];
 
                         if id >= self._truncation_size[k]:
                             # if this word is an out-of-vocabulary term
@@ -350,17 +320,17 @@ class Hybrid:
                     temp_phi = numpy.random.multinomial(1, temp_phi)[:, numpy.newaxis];
                     #assert(temp_phi.shape == (self.number_of_topics, 1));
                     
-                    phi[:, n][:, numpy.newaxis] = temp_phi;
+                    phi[:, word_index][:, numpy.newaxis] = temp_phi;
                     phi_sum += temp_phi;
                     #assert(numpy.all(phi_sum >= 0));
 
                     # discard the first few burn-in sweeps
-                    if it >= self._burn_in_sweeps:
+                    if sample_index >= self._burn_in_sweeps:
                         for k in xrange(self._number_of_topics):
-                            id = wordids[d][k, n];
+                            id = wordids[document_index][k, word_index];
                             sufficient_statistics[k][0, id] += temp_phi[k, 0];
 
-            batch_document_topic_distribution[d, :] = self._alpha_theta + phi_sum.T[0, :];
+            batch_document_topic_distribution[document_index, :] = self._alpha_theta + phi_sum.T[0, :];
                         
         for k in xrange(self._number_of_topics):
             sufficient_statistics[k] /= (self._number_of_samples - self._burn_in_sweeps);
@@ -482,23 +452,7 @@ class Hybrid:
         print 'P-step, E-step and M-step take %d, %d, %d seconds respectively...' % (clock_p_step, clock_e_step, clock_m_step);
         
         return batch_document_topic_distribution;
-
-    """
-    """
-    def inference(self, batch):
-        # This is to handle the case where someone just hands us a single document, not in a list.
-        if (type(batch).__name__ == 'string'):
-            temp = list()
-            temp.append(batch)
-            batch = temp
-
-        batch_size = len(batch);
-        wordids, wordcts = self.parse_doc_list(batch);
-        
-        gamma = self.e_step(batch_size, wordids, wordcts, True);
-        #log_likelihood = self.log_likelihood(batch, gamma, True);
-        return gamma;
-
+    
     """
     """
     def reverse_cumulative_sum_matrix_over_axis(self, matrix, axis):
@@ -524,7 +478,7 @@ class Hybrid:
 
             for index in self._index_to_nupos[k]:
                 freqdist.inc(index, exp_weights[k][0, self._index_to_nupos[k][index]]);
-
+                
             i = 0;
             for key in freqdist.keys():
                 i += 1;
