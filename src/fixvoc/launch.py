@@ -106,7 +106,7 @@ def main():
     alpha_theta = 1.0/number_of_topics;
     if options.alpha_theta>0:
         alpha_theta=options.alpha_theta;
-    options.alpha_eta = 1.0/len(vocab);
+    alpha_eta = 1.0/len(vocab);
     if options.alpha_eta>0:
         alpha_eta=options.alpha_eta
      
