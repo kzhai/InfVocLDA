@@ -5,8 +5,8 @@ import scipy.special;
 import nltk;
 
 from inferencer import compute_dirichlet_expectation;
-
 from inferencer import Inferencer;
+
 class Hybrid(Inferencer):
     def __init__(self,
                  hash_oov_words=False,
@@ -17,19 +17,6 @@ class Hybrid(Inferencer):
         
         self._number_of_samples = number_of_samples;
         self._burn_in_sweeps = burn_in_sweeps;
-
-    '''
-    def _initialize(self,
-                    vocab,
-                    number_of_topics,
-                    number_of_documents,
-                    alpha,
-                    eta,
-                    tau0,
-                    kappa
-                    ):
-        Inferencer._initialize(self, vocab, number_of_topics, number_of_documents, alpha, eta, tau0, kappa);
-    '''
 
     def parse_doc_list(self, docs):
         if (type(docs).__name__ == 'str'):
@@ -86,7 +73,7 @@ class Hybrid(Inferencer):
                     phi_sum *= phi_sum > 0;
                     #assert(numpy.all(phi_sum >= 0));
 
-                    temp_phi = (phi_sum + self._alpha_theta).T * self._exp_expect_log_beta[:, wordids[d][n]];
+                    temp_phi = (phi_sum + self._alpha_theta).T * self._exp_E_log_beta[:, wordids[d][n]];
                     assert(temp_phi.shape == (1, self._number_of_topics));
                     temp_phi /= numpy.sum(temp_phi);
 

@@ -4,16 +4,6 @@ import scipy;
 import scipy.special;
 import nltk;
 
-'''
-def compute_dirichlet_expectation(alpha):
-    """
-    For a vector theta ~ Dir(alpha), computes E[log(theta)] given alpha.
-    """
-    if (len(alpha.shape) == 1):
-        return(scipy.special.psi(alpha) - scipy.special.psi(numpy.sum(alpha)))
-    return(scipy.special.psi(alpha) - scipy.special.psi(numpy.sum(alpha, 1))[:, numpy.newaxis])
-'''
-
 def compute_dirichlet_expectation(dirichlet_parameter):
     if (len(dirichlet_parameter.shape) == 1):
         return scipy.special.psi(dirichlet_parameter) - scipy.special.psi(numpy.sum(dirichlet_parameter))
@@ -24,15 +14,13 @@ class Inferencer:
                  hash_oov_words=False,
                  compute_elbo=True
                  ):
-        numpy.random.seed(100000001);
-        
         self._hash_oov_words = hash_oov_words;
         self._compute_elbo = compute_elbo;
         
     def _initialize(self,
                     vocab,
-                    number_of_topics,
                     number_of_documents,
+                    number_of_topics,
                     alpha_theta,
                     alpha_eta,
                     tau0,
@@ -56,8 +44,8 @@ class Inferencer:
         self._epsilon = pow(self._tau + self._counter, -self._kappa)
 
         # Initialize the variational distribution q(beta|lambda)
-        self._lambda = 1*numpy.random.gamma(100., 1./100., (self._number_of_topics, self._vocab_size))
-        self._exp_expect_log_beta = numpy.exp(compute_dirichlet_expectation(self._lambda));
+        self._beta = 1*numpy.random.gamma(100., 1./100., (self._number_of_topics, self._vocab_size))
+        self._exp_E_log_beta = numpy.exp(compute_dirichlet_expectation(self._beta));
 
     def parse_doc_list(self, docs):
         raise NotImplementedError;
@@ -70,16 +58,16 @@ class Inferencer:
         self._epsilon = pow(self._tau + self._counter, -self._kappa)
         
         # update lambda based on documents.
-        self._lambda = self._lambda * (1-self._epsilon) + self._epsilon * (self._alpha_eta + self._number_of_documents * sstats / batch_size);
-        expect_log_beta = compute_dirichlet_expectation(self._lambda);
-        self._exp_expect_log_beta = numpy.exp(expect_log_beta);
+        self._beta = self._beta * (1-self._epsilon) + self._epsilon * (self._alpha_eta + self._number_of_documents * sstats / batch_size);
+        expect_log_beta = compute_dirichlet_expectation(self._beta);
+        self._exp_E_log_beta = numpy.exp(expect_log_beta);
         
         corpus_level_elbo = 0;
         
         if self._compute_elbo:
-            corpus_level_elbo += numpy.sum((self._alpha_eta - self._lambda) * expect_log_beta);
-            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._lambda) - scipy.special.gammaln(self._alpha_eta));
-            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha_eta * self._vocab_size) - scipy.special.gammaln(numpy.sum(self._lambda, 1)))
+            corpus_level_elbo += numpy.sum((self._alpha_eta - self._beta) * expect_log_beta);
+            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._beta) - scipy.special.gammaln(self._alpha_eta));
+            corpus_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha_eta * self._vocab_size) - scipy.special.gammaln(numpy.sum(self._beta, 1)))
         
         return corpus_level_elbo;
 
@@ -89,7 +77,7 @@ class Inferencer:
     """
     """
     def export_beta(self, exp_beta_path, top_display=-1):
-        self._exp_expect_log_beta = numpy.exp(compute_dirichlet_expectation(self._lambda));
+        self._exp_E_log_beta = numpy.exp(compute_dirichlet_expectation(self._beta));
         
         output = open(exp_beta_path, 'w');
         for k in xrange(self._number_of_topics):
@@ -98,7 +86,7 @@ class Inferencer:
             freqdist.clear();
 
             for word in self._vocab.keys():
-                freqdist.inc(word, self._exp_expect_log_beta[k, self._vocab[word]]);
+                freqdist.inc(word, self._exp_E_log_beta[k, self._vocab[word]]);
                 
             i=0;
             for key in freqdist.keys():

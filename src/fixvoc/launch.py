@@ -113,6 +113,7 @@ def main():
     # create output directory
     now = datetime.datetime.now();
     suffix = now.strftime("%y%b%d-%H%M%S")+"";
+    suffix += "-%s" % ("topDvocD");
     suffix += "-D%d" % (number_of_documents);
     suffix += "-K%d" % (number_of_topics)
     suffix += "-I%d" % (snapshot_interval);
@@ -120,8 +121,8 @@ def main():
     suffix += "-O%d" % (online_iterations);
     suffix += "-t%d" % (tau);
     suffix += "-k%g" % (kappa);
-    suffix += "-at%g" % (alpha_theta);
     suffix += "-ae%g" % (alpha_eta);
+    suffix += "-at%g" % (alpha_theta);
     suffix += "-%s" % (hybrid_mode);
     suffix += "-%s" % (hash_oov_words);
     suffix += "/";
@@ -183,7 +184,7 @@ def main():
         import variational;
         olda = variational.Variational(hash_oov_words);
         
-    olda._initialize(vocab, number_of_topics, number_of_documents, alpha_theta, alpha_eta, tau, kappa);
+    olda._initialize(vocab, number_of_documents, number_of_topics, alpha_theta, alpha_eta, tau, kappa);
 
     olda.export_beta(os.path.join(output_directory, 'exp_beta-0'), 50);
 

@@ -14,8 +14,8 @@ import scipy.special
 import nltk;
 
 from inferencer import compute_dirichlet_expectation;
-
 from inferencer import Inferencer;
+
 class Variational(Inferencer):
     def __init__(self,
                  hash_oov_words=False,
@@ -70,7 +70,7 @@ class Variational(Inferencer):
         gamma = 1*numpy.random.gamma(100., 1./100., (batch_size, self._number_of_topics))
         exp_E_log_theta = numpy.exp(compute_dirichlet_expectation(gamma))
 
-        sstats = numpy.zeros(self._lambda.shape)
+        sstats = numpy.zeros(self._beta.shape)
         # Now, for each document d update that document's gamma and phi
         meanchange = 0
         for d in range(0, batch_size):
@@ -79,7 +79,7 @@ class Variational(Inferencer):
             cts = wordcts[d]
             gammad = gamma[d, :]
             exp_E_log_theta_d = exp_E_log_theta[d, :]
-            exp_E_log_beta_d = self._exp_expect_log_beta[:, ids]
+            exp_E_log_beta_d = self._exp_E_log_beta[:, ids]
             # The optimal phi_{dwk} is proportional to expElogthetad_k * expElogbetad_w. phi_norm is the normalizer.
             phi_norm = numpy.dot(exp_E_log_theta_d, exp_E_log_beta_d) + 1e-100
             # Iterate between gamma and phi until convergence
@@ -106,7 +106,7 @@ class Variational(Inferencer):
                 document_level_elbo += numpy.sum(scipy.special.gammaln(self._alpha_theta * self._number_of_topics) - scipy.special.gammaln(numpy.sum(gammad)));
 
         # This step finishes computing the sufficient statistics for the M step, so that sstats[k, w] = \sum_d n_{dw} * phi_{dwk} = \sum_d n_{dw} * exp{Elogtheta_{dk} + Elogbeta_{kw}} / phinorm_{dw}.
-        sstats = sstats * self._exp_expect_log_beta
+        sstats = sstats * self._exp_E_log_beta
 
         if self._compute_elbo:
             document_level_elbo *= self._number_of_documents / batch_size;
@@ -162,7 +162,7 @@ class Variational(Inferencer):
                 phinorm[i] = numpy.log(sum(numpy.exp(temp - tmax))) + tmax
             score += numpy.sum(cts * phinorm)
 #             oldphinorm = phinorm
-#             phinorm = n.dot(expElogtheta[d, :], self._exp_expect_log_beta[:, ids])
+#             phinorm = n.dot(expElogtheta[d, :], self._exp_E_log_beta[:, ids])
 #             print oldphinorm
 #             print n.log(phinorm)
 #             score += n.sum(cts * n.log(phinorm))
@@ -176,9 +176,9 @@ class Variational(Inferencer):
         score = score * self._number_of_documents / len(docs)
 
         # E[log p(beta | eta) - log q (beta | lambda)]
-        score = score + numpy.sum((self._alpha_eta-self._lambda)*self._Elogbeta)
-        score = score + numpy.sum(gammaln(self._lambda) - gammaln(self._alpha_eta))
+        score = score + numpy.sum((self._alpha_eta-self._beta)*self._Elogbeta)
+        score = score + numpy.sum(gammaln(self._beta) - gammaln(self._alpha_eta))
         score = score + numpy.sum(gammaln(self._alpha_eta*self._vocab_size) - 
-                              gammaln(numpy.sum(self._lambda, 1)))
+                              gammaln(numpy.sum(self._beta, 1)))
 
         return(score)
