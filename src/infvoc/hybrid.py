@@ -122,7 +122,12 @@ class Hybrid:
             for index in vocab:
                 self._nupos_to_index[k][len(self._nupos_to_index[k])] = index;
                 self._index_to_nupos[k][index] = len(self._index_to_nupos[k]);
-                
+        
+        self._alpha_theta = alpha_theta;
+        self._alpha_beta = alpha_beta;
+        self._tau = tau;
+        self._kappa = kappa;
+        
         self._truncation_size = [];
         self._truncation_size_prime = [];
         self._nu_1 = {};
@@ -134,11 +139,6 @@ class Hybrid:
             self._nu_2[k] = numpy.ones((1, self._truncation_size[k])) * self._alpha_beta;
 
         self._expected_truncation_size = expected_truncation_size;
-        
-        self._alpha_theta = alpha_theta;
-        self._alpha_beta = alpha_beta;
-        self._tau = tau;
-        self._kappa = kappa;
         
         #self._gamma_converge_threshold = gamma_converge_threshold;
         self._number_of_samples = number_of_samples;
