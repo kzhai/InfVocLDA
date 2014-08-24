@@ -14,7 +14,7 @@ from nltk.util import ingrams
 
 from nltk.model.api import *
 
-random.seed(99999999);
+#random.seed(99999999);
 
 def _estimator(fdist, bins):
     """
@@ -31,7 +31,6 @@ class NcharModel(ModelI):
     A processing interface for assigning a probability to the next word.
     """
     
-    # add cutoff
     def __init__(self,
                  n,
                  train,
@@ -174,7 +173,8 @@ class NcharModel(ModelI):
 
         # recursively construct the lower-order models
         if n > 1:
-            self._backoff = NcharModel(n-1, train, self._char_set, self._patch_char);
+            self._backoff = NcharModel(n-1, train, self._smoothing, maximum_length,
+                 minimum_length, self._char_set, self._patch_char);
         
     def probability(self, word):
         # This is the naive way to write compute probability without backoff

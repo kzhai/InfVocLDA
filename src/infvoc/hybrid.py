@@ -238,14 +238,14 @@ class Hybrid:
                         self._truncation_size_prime[topic] += 1;
                         
                     document_topics[topic, word_index]=self._index_to_nupos[topic][index];
-                    
+                
             batch_documents.append(document_topics);
             
         if self._word_trace!=None:
             self.update_word_trace();
         
         self._new_words.append(len(self._word_to_index));
-        
+
         return batch_documents;
 
     """
@@ -439,7 +439,7 @@ class Hybrid:
         
         # E-step: hybrid approach, sample empirical topic assignment
         clock = time.time();
-        sufficient_statistics, batch_document_topic_distribution = self.e_step(batch_size, wordids);
+        sufficient_statistics, batch_document_topic_distribution = self.e_step(wordids);
         clock_e_step = time.time() - clock;
         
         # M-step: online variational inference
