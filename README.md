@@ -25,7 +25,7 @@ To launch the online LDA with pre-defined vocabulary, run the following command
 
 To launch the online LDA with dynamic vocabulary, run the following command
 
-    python -m infvoc.launch --input_directory=../input/ --output_directory=../output/ --corpus_name=de-news --desired_truncation_level=4000 --number_of_topics=10 --number_of_documents=9800 --vocab_prune_interval=10 --batch_size=100 --alpha_beta=1000
+    python -m infvoc.launch --input_directory=../input/ --output_directory=../output/ --corpus_name=de-news --truncation_level=4000 --number_of_topics=10 --number_of_documents=9800 --vocab_prune_interval=10 --batch_size=100 --alpha_beta=1000
 
 Under any cirsumstances, you may also get help information and usage hints by running the following command
 
