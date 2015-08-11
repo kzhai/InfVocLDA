@@ -86,7 +86,8 @@ class Inferencer:
             freqdist.clear();
 
             for word in self._vocab.keys():
-                freqdist.inc(word, self._exp_E_log_beta[k, self._vocab[word]]);
+                #freqdist.inc(word, self._exp_E_log_beta[k, self._vocab[word]]);
+                freqdist[word]+=self._exp_E_log_beta[k, self._vocab[word]];
                 
             i=0;
             for key in freqdist.keys():
