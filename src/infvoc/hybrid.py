@@ -155,7 +155,9 @@ class Hybrid:
             self._ranking_statistics.append(nltk.probability.FreqDist());
 
             for index in self._index_to_nupos[k]:
-                self._ranking_statistics[k].inc(index, self._ranking_smooth_factor);
+                #self._ranking_statistics[k].inc(index, self._ranking_smooth_factor);
+                self._ranking_statistics[k][index] += self._ranking_smooth_factor;
+
                 '''
                 if self._word_model != None:
                     self._ranking_statistics[k].inc(index, self._word_model.probability(self._index_to_word[index]) * self._ranking_statistics_scale);
@@ -224,7 +226,8 @@ class Hybrid:
                         self._word_trace.append(numpy.zeros((self._number_of_topics, self._number_of_documents/self._batch_size + 1), dtype='int32') + numpy.iinfo(numpy.int32).max);
                         
                     for topic in xrange(self._number_of_topics):
-                        self._ranking_statistics[topic].inc(index, self._ranking_smooth_factor);
+                        #self._ranking_statistics[topic].inc(index, self._ranking_smooth_factor);
+                        self._ranking_statistics[topic][index] += self._ranking_smooth_factor;
 
                 else:
                     index = self._word_to_index[word];
@@ -369,13 +372,15 @@ class Hybrid:
     def update_accumulate_sufficient_statistics(self, sufficient_statistics):
         for k in xrange(self._number_of_topics):
             for index in self._index_to_word:
-                self._ranking_statistics[k].inc(index, -self._epsilon*self._ranking_statistics[k][index]);
+                #self._ranking_statistics[k].inc(index, -self._epsilon*self._ranking_statistics[k][index]);
+                self._ranking_statistics[k][index] += -self._epsilon*self._ranking_statistics[k][index];
             for index in self._index_to_nupos[k]:
                 if self._word_model != None:
                     adjustment = self._word_model.probability(self._index_to_word[index]) * self._ranking_statistics_scale;
                 else:
                     adjustment = 1.;
-                self._ranking_statistics[k].inc(index, self._epsilon*adjustment*sufficient_statistics[k][0, self._index_to_nupos[k][index]]);
+                #self._ranking_statistics[k].inc(index, self._epsilon*adjustment*sufficient_statistics[k][0, self._index_to_nupos[k][index]]);
+                self._ranking_statistics[k][index] += self._epsilon*adjustment*sufficient_statistics[k][0, self._index_to_nupos[k][index]];
 
     """
     """
@@ -477,7 +482,8 @@ class Hybrid:
             freqdist.clear();
 
             for index in self._index_to_nupos[k]:
-                freqdist.inc(index, exp_weights[k][0, self._index_to_nupos[k][index]]);
+                #freqdist.inc(index, exp_weights[k][0, self._index_to_nupos[k][index]]);
+                freqdist[index]+=exp_weights[k][0, self._index_to_nupos[k][index]]
                 
             i = 0;
             for key in freqdist.keys():
@@ -721,7 +727,8 @@ class Hybrid:
             #assert ranking_statistics[0]==str(k);
             for token in ranking_statistics:
                 tokens = token.split('=');
-                self._ranking_statistics[k].inc(int(tokens[0]), float(tokens[1]) + self._ranking_smooth_factor);
+                #self._ranking_statistics[k].inc(int(tokens[0]), float(tokens[1]) + self._ranking_smooth_factor);
+                self._ranking_statistics[k][int(tokens[0])] += float(tokens[1]) + self._ranking_smooth_factor;
 
     """
     """
