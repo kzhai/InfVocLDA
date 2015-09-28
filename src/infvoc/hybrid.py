@@ -10,7 +10,7 @@ import scipy;
 import scipy.special;
 import scipy.io;
 import scipy.sparse;
-import nchar;
+#import nchar;
 
 import nltk;
 import nltk.corpus;
@@ -40,7 +40,7 @@ class Hybrid:
         self._char_list = char_list;
         self._n_char_model = N;
 
-        #'''
+        '''
         if dict_list != None:
             tokens = [];
             for line in open(dict_list, 'r'):
@@ -50,10 +50,11 @@ class Hybrid:
                 #tokens.append(line);
                 tokens.append(self._stemmer.stem(line));
             #tokens = set(tokens);
-            self._word_model = nchar.NcharModel(self._n_char_model, tokens, self._word_model_smooth, self._maximum_word_length, self._minimum_word_length, self._char_list);
+            #self._word_model = nchar.NcharModel(self._n_char_model, tokens, self._word_model_smooth, self._maximum_word_length, self._minimum_word_length, self._char_list);
         else:
             self._word_model = None;
-        #'''
+        '''
+        self._word_model = None;
         
         self._ranking_statistics_scale = ranking_statistics_scale;
         

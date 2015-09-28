@@ -9,10 +9,11 @@ import re;
 import sys
 import time;
 
-from nltk.probability import ConditionalProbDist, ConditionalFreqDist, MLEProbDist, LaplaceProbDist, GoodTuringProbDist#, SimpleGoodTuringProbDist
-from nltk.util import ingrams
+from nltk.probability import ConditionalProbDist, ConditionalFreqDist, MLEProbDist, LaplaceProbDist, SimpleGoodTuringProbDist
+#GoodTuringProbDist#, 
+from nltk.util import ngrams
 
-from nltk.model.api import *
+#from nltk.model.api import ModelI
 
 #random.seed(99999999);
 
@@ -23,8 +24,8 @@ def _estimator(fdist, bins):
     # can't be an instance method of NgramModel as they 
     # can't be pickled either.
     
-    return GoodTuringProbDist(fdist);
-    #return nltk.probability.SimpleGoodTuringProbDist(fdist);
+    #return GoodTuringProbDist(fdist);
+    return SimpleGoodTuringProbDist(fdist);
 
 class NcharModel(ModelI):
     """
@@ -93,7 +94,7 @@ class NcharModel(ModelI):
         
         #context_freq_dist = nltk.probability.FreqDist();
         #for nchar in ingrams(chain(self._prefix, train), n):
-        for nchar in ingrams(char_list, n):
+        for nchar in ngrams(char_list, n):
             self._ngrams.add(nchar)
             context = tuple(nchar[:-1])
             #context_freq_dist.inc(context);

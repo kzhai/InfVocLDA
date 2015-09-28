@@ -187,7 +187,7 @@ def main():
     print "successfully load all training documents..."
 
     import hybrid;
-    olda = hybrid.Hybrid(3, 20, dictionary_file)
+    olda = hybrid.Hybrid(3, 20)
 
     olda._initialize(vocab,
                      number_of_topics,
@@ -220,7 +220,7 @@ def main():
         if (olda._counter % snapshot_interval == 0):
             olda.export_beta(os.path.join(output_directory, 'exp_beta-' + str(olda._counter)), 50);
 
-        if document_topic_distribution==None:
+        if document_topic_distribution is None:
             document_topic_distribution = batch_gamma;
         else:
             document_topic_distribution = numpy.vstack((document_topic_distribution, batch_gamma));
